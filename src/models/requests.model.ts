@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 export interface RoleRequest {
   _id: string;
-  userId: string;
+  guildId: string;
   roleId: string;
   messageId: string;
 }
@@ -12,7 +12,7 @@ const schema = new Schema<RoleRequest>({
     type: String,
     required: true,
   },
-  userId: {
+  guildId: {
     type: String,
     required: true,
   },

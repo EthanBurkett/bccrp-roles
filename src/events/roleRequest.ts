@@ -5,6 +5,7 @@ import {
   Interaction,
   MessageEmbed,
 } from "discord.js";
+import { Embeds } from "../utils/embeds";
 import requestsModel from "../models/requests.model";
 
 export const config = {
@@ -18,7 +19,7 @@ export const run = (client: Client) => {
     const button = interaction as ButtonInteraction;
 
     const db = await requestsModel.findOne({
-      _id: button.guild!.id,
+      guildId: button.guild!.id,
       messageId: button.message.id,
     });
     if (!button.guild || !db) {
@@ -36,8 +37,10 @@ export const run = (client: Client) => {
       });
     }
 
-    const member = button.guild.members.cache.get(db!.userId);
+    const member = button.guild.members.cache.get(db!._id);
     const channel = button.channel;
+    let message = await button.channel?.messages.fetch(db!.messageId);
+    if (message?.partial) message = await message.fetch();
 
     if (!member) return;
 
@@ -54,15 +57,6 @@ export const run = (client: Client) => {
               description: `This role is higher than my highest role. I cannot give <@&${db.roleId}> to **${member}**`,
             }),
           ];
-
-          button.channel?.messages.fetch(db.messageId).then(async (msg) => {
-            await msg.delete().catch(() => {});
-          });
-
-          await requestsModel.deleteOne({
-            _id: button.guild!.id,
-            messageId: button.message.id,
-          });
 
           error = true;
 
@@ -94,8 +88,20 @@ export const run = (client: Client) => {
             embeds: Embed,
           });
 
+          member
+            .send({
+              embeds: [
+                Embeds.Success(
+                  `Your role request for ${
+                    button.guild?.roles.cache.get(db.roleId)?.name
+                  } has been accepted.`
+                ),
+              ],
+            })
+            .catch(() => {});
+
           await requestsModel.deleteOne({
-            _id: button.guild!.id,
+            guildId: button.guild!.id,
             messageId: button.message.id,
           });
         });
@@ -117,8 +123,21 @@ export const run = (client: Client) => {
       channel?.send({
         embeds: Embed,
       });
+
+      member
+        .send({
+          embeds: [
+            Embeds.Error(
+              `Your role request for ${
+                button.guild?.roles.cache.get(db.roleId)?.name
+              } has been denied.`
+            ),
+          ],
+        })
+        .catch(() => {});
+
       await requestsModel.deleteOne({
-        _id: button.guild.id,
+        guildId: button.guild.id,
         messageId: button.message.id,
       });
     }

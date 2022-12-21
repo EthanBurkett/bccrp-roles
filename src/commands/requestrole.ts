@@ -14,15 +14,23 @@ export default {
       type: "ROLE",
       required: true,
     },
+    {
+      name: "user",
+      description: "User to request the role for",
+      type: "USER",
+      required: false,
+    },
   ],
   testOnly: true,
   async run({ guild, member, interaction }) {
     if (!guild) return;
     const role = interaction!.options.getRole("role", true).id;
+    const user = interaction!.options.getUser("user", false);
+    const target = user ? guild.members.cache.get(user.id)! : member;
 
     const exists = await requestsModel.findOne({
-      _id: guild.id,
-      userId: member!.id,
+      _id: target.id,
+      guildId: guild.id,
     });
 
     if (exists)
@@ -80,22 +88,18 @@ export default {
 
     const newMsg = await channel.send({
       components: [row],
+      content: "@here",
       embeds: [
         Embeds.Info(
-          `Success`,
-          `${member!} (${
-            member!.id
-          }) has requested the role ${interaction!.options.getRole(
-            "role",
-            true
-          )}.`
+          `Role Assignment Request`,
+          `**Role:** <@&${role}>\n**Recipient:** ${target}\n**Requested by:** ${member}`
         ),
       ],
     });
 
     await requestsModel.create({
-      _id: guild.id,
-      userId: member!.id,
+      _id: target.id,
+      guildId: guild.id,
       messageId: newMsg.id,
       roleId: role,
     });
