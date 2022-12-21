@@ -27,6 +27,7 @@ Array.prototype.chunk = function (size: number): any {
 
 export default {
   description: "Displays the menu for all commands",
+  testOnly: true,
   options: [
     {
       name: "page",

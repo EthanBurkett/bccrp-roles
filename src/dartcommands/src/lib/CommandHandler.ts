@@ -54,11 +54,12 @@ export default class CommandHandler {
       return message.reply({ content: "DMs are disabled for this bot." });
     if (message.member?.user.id == this._client!.user!.id) return;
     const Prefix: string = message.guild
-      ? instance.Cache?.GuildPrefixes?.get(message.guild!.id) ?? instance.prefix
+      ? instance.Cache.GuildPrefixes.get(message.guild.id) || instance.prefix
       : instance.prefix;
 
     const MessagePrefix: string = message.content.substring(0, Prefix.length);
     let args: string[] = message.content.split(" ");
+
     if (
       Prefix !== MessagePrefix ||
       (this._options.ignoreBots && message.author.bot)
@@ -73,7 +74,7 @@ export default class CommandHandler {
 
     if (!Command)
       Command = Commands.find(
-        (cmd) =>
+        (cmd: any) =>
           cmd.aliases! &&
           cmd.aliases.includes(args[0].substring(Prefix.length, args[0].length))
       );

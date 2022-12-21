@@ -12,6 +12,7 @@ import path from "path";
 import chalk from "chalk";
 import CommandHandler from "./CommandHandler";
 import { Utils } from "../index";
+import getAllFiles from "./get-all-files";
 
 export default class CommandLoader {
   private _client: Client;
@@ -56,72 +57,13 @@ export default class CommandLoader {
 
   private async load() {
     this.loadInternal();
-    (
-      await PG(
-        `${path.join(process.cwd(), this._options.commandsDir)}/**/*.${
-          this._options.typescript ? "ts" : "js"
-        }`
-      )
-    ).map((file: any) => {
-      const L = file.split("/");
-      let name = L[L.length - 1].substring(0, L[L.length - 1].length - 3);
-      let Command: ICommand = this._options.typescript
-        ? require(file).default
-        : require(file);
-
-      if (!Command) {
-        console.log(
-          chalk.red.bold(`Error: `) +
-            "Could not load command " +
-            chalk.white.bold(name)
-        );
-        process.exit(0);
-      }
-      if (Command.name) {
-        name = Command.name;
-      } else {
-        Command.name = name;
-      }
-
-      if (!Command.run) {
-        console.log(
-          chalk.red.bold(`Error: `) +
-            "No property named 'run' in command: " +
-            chalk.white.bold(name)
-        );
-        process.exit(0);
-      }
-
-      if (Command.slash) {
-        if (this._options.testServers && Command.testOnly) {
-          this._options.testServers.map((server: string) => {
-            this.create(
-              Command.name!,
-              Command.description,
-              Command.options!,
-              server
-            );
-          });
-        } else {
-          this.create(Command.name!, Command.description, Command.options!);
-        }
-      }
-
-      this._commands.set(name, Command);
-    });
-    this.checkUnusedSlash();
-    Utils.CLILog(
-      `Loaded ${chalk.blueBright(`${this._commands.size}`)} command(s)`
-    );
-  }
-
-  // TODO: Change to JS on production build
-  private async loadInternal() {
-    (await PG(`${path.join(__dirname, "InternalCommands")}/**/*.js`)).map(
+    getAllFiles(`${process.cwd()}/${this._options.commandsDir}`).map(
       (file: any) => {
-        const L = file.split("/");
+        const L = file.replace(/\\/g, "/").replace(/\\\\/g).split("/");
         let name = L[L.length - 1].substring(0, L[L.length - 1].length - 3);
-        let Command: ICommand = require(file).default;
+        let Command: ICommand = this._options.typescript
+          ? require(file).default
+          : require(file);
 
         if (!Command) {
           console.log(
@@ -137,9 +79,6 @@ export default class CommandLoader {
           Command.name = name;
         }
 
-        if (this._options.disabledDefaultCommands?.includes(name)) return;
-        if (name == "prefix" && !this._options.mongo) return;
-
         if (!Command.run) {
           console.log(
             chalk.red.bold(`Error: `) +
@@ -149,9 +88,65 @@ export default class CommandLoader {
           process.exit(0);
         }
 
+        if (Command.slash) {
+          if (this._options.testServers && Command.testOnly) {
+            this._options.testServers.map((server: string) => {
+              this.create(
+                Command.name!,
+                Command.description,
+                Command.options!,
+                server
+              );
+            });
+          } else {
+            this.create(Command.name!, Command.description, Command.options!);
+          }
+        }
+
         this._commands.set(name, Command);
       }
     );
+    this.checkUnusedSlash();
+    Utils.CLILog(
+      `Loaded ${chalk.blueBright(`${this._commands.size}`)} command(s)`
+    );
+  }
+
+  // TODO: Change to JS on production build
+  private async loadInternal() {
+    getAllFiles(`${__dirname}/InternalCommands`).map((file: any) => {
+      const L = file.replace(/\\/g, "/").replace(/\\\\/g).split("/");
+      let name = L[L.length - 1].substring(0, L[L.length - 1].length - 3);
+      let Command: ICommand = require(file).default;
+
+      if (!Command) {
+        console.log(
+          chalk.red.bold(`Error: `) +
+            "Could not load command " +
+            chalk.white.bold(name)
+        );
+        process.exit(0);
+      }
+      if (Command.name) {
+        name = Command.name;
+      } else {
+        Command.name = name;
+      }
+
+      if (this._options.disabledDefaultCommands?.includes(name)) return;
+      if (name == "prefix" && !this._options.mongo) return;
+
+      if (!Command.run) {
+        console.log(
+          chalk.red.bold(`Error: `) +
+            "No property named 'run' in command: " +
+            chalk.white.bold(name)
+        );
+        process.exit(0);
+      }
+
+      this._commands.set(name, Command);
+    });
   }
 
   public get commands() {

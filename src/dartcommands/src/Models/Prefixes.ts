@@ -15,12 +15,4 @@ const schema = new mongoose.Schema({
   },
 });
 
-schema.post("save", (guildid, prefix) => {
-  DartCommands.prototype.client.emit<Events>(
-    "Dart.UpdatePrefix",
-    guildid,
-    prefix
-  );
-});
-
 export default mongoose.models[Name] || mongoose.model(Name, schema);
