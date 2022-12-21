@@ -4,13 +4,16 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "@types/glob": "^8.0.0",
+    "@types/moment": "^2.13.0",
     "chalk": "4.1.2",
     "discord.js": "13.6.0",
     "glob": "^8.0.3",
+    "moment": "^2.29.4",
     "mongoose": "^6.8.1",
     "tsconfig.json": "^1.0.11"
   }

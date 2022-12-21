@@ -1,4 +1,5 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { Embeds } from "../utils/embeds";
 import { ICommand } from "../dartcommands";
 import requestsModel from "../models/requests.model";
 import rradminModel from "../models/rradmin.model";
@@ -28,12 +29,9 @@ export default {
       return interaction!.reply({
         ephemeral: true,
         embeds: [
-          new MessageEmbed({
-            title: "Error",
-            color: "RED",
-            description:
-              "You already have a role request waiting to be approved. Please wait until it is approved or denied.",
-          }),
+          Embeds.Error(
+            "You already have a role request waiting to be approved. Please wait until it is approved or denied."
+          ),
         ],
       });
 
@@ -42,12 +40,9 @@ export default {
       return {
         ephemeral: true,
         embeds: [
-          new MessageEmbed({
-            title: "Error",
-            color: "RED",
-            description:
-              "The server admins have not configured the request role system.",
-          }),
+          Embeds.Error(
+            "The server admins have not configured the request role system."
+          ),
         ],
       };
 
@@ -56,12 +51,9 @@ export default {
       return {
         ephemeral: true,
         embeds: [
-          new MessageEmbed({
-            title: "Error",
-            color: "RED",
-            description:
-              "The server admins have not configured the request role system properly.",
-          }),
+          Embeds.Error(
+            "The server admins have not configured the request role system properly."
+          ),
         ],
       };
 
@@ -69,12 +61,9 @@ export default {
       return {
         ephemeral: true,
         embeds: [
-          new MessageEmbed({
-            title: "Error",
-            color: "RED",
-            description:
-              "The server admins have not configured the request role system properly.",
-          }),
+          Embeds.Error(
+            "The server admins have not configured the request role system properly."
+          ),
         ],
       };
 
@@ -92,16 +81,15 @@ export default {
     const newMsg = await channel.send({
       components: [row],
       embeds: [
-        new MessageEmbed({
-          title: "Role Request",
-          color: "BLUE",
-          description: `${member!} (${
+        Embeds.Info(
+          `Success`,
+          `${member!} (${
             member!.id
           }) has requested the role ${interaction!.options.getRole(
             "role",
             true
-          )}.`,
-        }),
+          )}.`
+        ),
       ],
     });
 
@@ -115,11 +103,7 @@ export default {
     interaction?.reply({
       ephemeral: true,
       embeds: [
-        new MessageEmbed({
-          title: "Success",
-          color: "GREEN",
-          description: "Your request has been sent to the server admins.",
-        }),
+        Embeds.Success("Your request has been sent to the server admins."),
       ],
     });
   },

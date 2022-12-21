@@ -16,6 +16,7 @@ client.on("ready", () => {
     typescript: true,
     testServers: ["702556315699904604"],
     commandsDir: "src/commands",
+    botOwners: ["465742041716883466"],
     mongo: {
       uri: Config.MONGO,
     },
@@ -24,3 +25,5 @@ client.on("ready", () => {
 });
 
 client.login(Config.TOKEN);
+
+export { client };
