@@ -1,4 +1,4 @@
-import Dart from "../dartcommands/src";
+import Dart from "./dartcommands/src";
 import { Client, Intents } from "discord.js";
 import Config from "./!config";
 import mongoose from "mongoose";

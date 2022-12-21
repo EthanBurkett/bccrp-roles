@@ -1,5 +1,5 @@
 import { MessageEmbed } from "discord.js";
-import { ICommand } from "../../dartcommands";
+import { ICommand } from "../dartcommands";
 import rradminModel from "../models/rradmin.model";
 
 export default {

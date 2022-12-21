@@ -16,7 +16,7 @@ declare global {
 }
 
 Array.prototype.chunk = function (size: number): any {
-  let result = [];
+  let result: any[] = [];
 
   while (this.length) {
     result.push(this.splice(0, size));

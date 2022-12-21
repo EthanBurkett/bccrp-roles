@@ -1,5 +1,5 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
-import { ICommand } from "../../dartcommands";
+import { ICommand } from "../dartcommands";
 import requestsModel from "../models/requests.model";
 import rradminModel from "../models/rradmin.model";
 
